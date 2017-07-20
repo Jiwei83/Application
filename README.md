@@ -1,6 +1,6 @@
 **Prior the script**
 
-  **1. Install php 7.1**
+  **1. Install php 7.1**
   
   $ sudo apt-get install python-software-properties
   
@@ -21,7 +21,7 @@
 
   **3. Install PHP-MySQL extension for Linux**
   
-  sudo apt install php7.1-mysql
+  $sudo apt install php7.1-mysql
   
   
 
