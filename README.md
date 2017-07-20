@@ -19,7 +19,7 @@ This will be used with the read content of file and create table. If the users a
 
 The format of this command should be:
 
- **--dry_run command should be '--dry_run --file[filename] -u -username -p -password -h -host**
+ **--dry_run --file[filename] -u -username -p -password -h -host**
 
 •**--help:**
 This will output the above list of directives with details.
