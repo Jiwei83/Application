@@ -7,7 +7,7 @@ The format of --file command should be:
 
  **--file[filename.csv]**
 
-**•--create_table: **
+•**--create_table: **
 This will cause the MySQL users table to be built (and no further action will be taken).
 
 The format of --create_table should be:
