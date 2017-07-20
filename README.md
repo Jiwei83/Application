@@ -24,6 +24,7 @@
   $sudo apt install php7.1-mysql
   
   
+  
 
 **The PHP script will include these command line options (directives):**
 
