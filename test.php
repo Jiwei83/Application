@@ -1,13 +1,64 @@
 <?php
+if ($argv[1] == '--dry_run' && sizeof($argv) != 9) {
+	echo "The format of --dry_run command should be '--dry_run --file[filename] -u -username -p -password -h -host'  \r\n";
+}
+else if (sizeof($argv) != 2 && preg_match('/--file\[[\w%+\/-]+.csv\]/', $argv[1])) {
+	echo "The format of --file command should be '--file[filename.csv]'  \r\n";
+}
+else if ($argv[1] == '--create_table' && sizeof($argv) != 4) {
+	echo "The format of --create_table should be '--create_table -u -username -p -password -h -host'";
+}
+else if ($argv[1] != '--dry_run' 
+		&& !preg_match('/--file\[[\w%+\/-]+.csv\]/', $argv[1])
+		&& $argv[1] != '--create_table') {
+	echo "Invalid Command!!";
+}
+else {
+	switch ($argv[1]) {
+		case '--dry_run':
+			dryRun($argv);
+			break;
+		 case '--create_table':
+		 	$user = substr($argv[3], 1);
+			$pass = substr($argv[5], 1);
+			$host = substr($argv[7], 1);
+			if(createTable($host, $user, $pass, $db)) {
+				echo "Create table successfully! \r\n";
+			}
+			break;
+		 default:
+			$file = substr($argv[2], 7, -1);
+			print_r(getFile($file));
+		 	break;
+	}
+}
 
-$host = '127.0.0.1';
-$user = 'root';
-$pass = 'root';
-$db   = 'test';
-createTable($host, $user, $pass, $db);
-//connect2Databse($host, $user, $pass, $db);
-$data = getFile('123.csv');
-insertData($data, $host, $user, $pass, $db);
+
+function dryRun($command) {
+	$isSuccessful = false;
+	$file = substr($command[2], 7, -1);
+	$user = substr($command[4], 1);
+	$pass = substr($command[6], 1);
+	$host = substr($command[8], 1);
+
+	$records = getFile($file);
+	$isSuccessful = createTable($host, $user, $pass, 'test');
+	if ($isSuccessful) {
+		echo "Create table successfully! \r\n";
+		echo "Do you want to insert data? [Y/n]";
+		$handle = fopen ("php://stdin","r");
+		$line = fgets($handle);
+		if (trim($line) == 'Y') {
+			insertData($records, $host, $user, $pass, 'test');
+		}
+		if(trim($line) == 'n'){
+    		echo "Exit!!\n";
+    		exit;
+		}
+		fclose($handle);
+	}	
+}
+
 function getFile($file) {
 	$data = fopen($file,"r");
  	$i = 0;
@@ -37,20 +88,21 @@ function connect2Databse($host, $user, $pass, $db) {
 }
 
 function createTable($host, $user, $pass, $db) {
+	$status = false;
 	$pdo = connect2Databse($host, $user, $pass, $db);
-	$statement = "CREATE TABLE IF NOT EXISTS USERS (ID INT(11) AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(50) NOT NULL, SURNAME VARCHAR(50) NOT NULL, EMAIL VARCHAR(100) NOT NULL UNIQUE);";
-	$table = $pdo->exec($statement);
-
-	if ($table !== false) {
-		echo "Succeed!!";
+	$sql = "CREATE TABLE IF NOT EXISTS USERS (ID INT(11) AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(50) NOT NULL, SURNAME VARCHAR(50) NOT NULL, EMAIL VARCHAR(100) NOT NULL UNIQUE);";
+	$statement = $pdo->prepare($sql);
+	$statement->execute();
+	if ($statement->errorCode() == 0) {
+		$status = true;
 	}
-	else {
-		echo "Fail!";
-	}
+	
+	return $status;
 }	
 
 function insertData($data, $host, $user, $pass, $db) {
 	$pdo = connect2Databse($host, $user, $pass, $db);
+	$a = 1;
  	foreach($data as $record) {
 		$sql = "INSERT INTO USERS (NAME, SURNAME, EMAIL) VALUES(:name, :surname, :email)";
 		if (filter_var(trim($record[2]), FILTER_VALIDATE_EMAIL)) {
@@ -61,16 +113,18 @@ function insertData($data, $host, $user, $pass, $db) {
 			'email'   => strtolower(trim($record[2]))
 			));
 			if ($statement->errorCode() == 0) {
-				echo "New records inserted successfully \r\n";
+				echo $a.": New records inserted successfully \r\n";
+				$a++;
 			}
 			else {
-				echo $statement->errorInfo()[2].'\r\n';
+				echo $a.": ".$statement->errorInfo()[2]."\r\n";
+				$a++;
 				continue;
 			}
-			
 		}
 		else {
-			echo "$record[2] Email Invalid!! \r\n";
+			echo $a.": $record[2] Email Invalid!! \r\n";
+			$a++;
 		}
 	}
 }
