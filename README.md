@@ -1,3 +1,18 @@
+**Prior the script**
+
+  **1. Install php 7.1**
+  $ sudo apt-get install python-software-propertie  s
+  $ sudo add-apt-repository ppa:ondrej/php
+  $ sudo apt-get update
+  $ sudo apt-get install -y php7.1
+
+  **2. Install Mysql**
+  $ sudo apt-get update
+  $ sudo apt-get install mysql-server
+
+  **3. Install PHP-MySQL extension for Linux**
+  sudo apt install php7.1-mysql
+
 **The PHP script will include these command line options (directives):**
 
 •**--file [csv file name]:**
